@@ -1,21 +1,23 @@
-## A better cd for lazy people like me
+### A better cd for lazy people like me
 
 I never liked the `cd` command. I never remember how to use it properly. So I made this. Makes my brain just be able to 
 remember one command instead of two and then I can just use the arrow keys to navigate.
 
-### Installation
+Note: this thing was vibed in in about 2.5 minutes. Use at your discreation!
+
+## Installation
 
 ```sh
 cargo install better_cd
 ```
 
-### Usage
+## Usage
 
 ```sh
 cd+
 ```
 
-### Keybindings
+## Keybindings
 
 - `q`: quit
 - `Esc`: quit
@@ -25,6 +27,6 @@ cd+
 - `Up`: go to previous directory
 - `Enter`: select directory
 
-### License
+## License
 
 MIT License
