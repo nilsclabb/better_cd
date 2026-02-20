@@ -11,9 +11,14 @@ pub fn draw(f: &mut Frame, app: &mut App) {
     let chunks = Layout::default()
         .direction(Direction::Vertical)
         .margin(1)
-        .constraints([Constraint::Length(3), Constraint::Min(0)].as_ref())
+        .constraints([
+            Constraint::Length(3), // Header (Path)
+            Constraint::Length(3), // Search Query
+            Constraint::Min(0),    // List
+        ].as_ref())
         .split(f.area());
 
+    // 1. Header Line (Path)
     let header_line = Line::from(vec![
         Span::styled(
             " Better CD (bcd) ",
@@ -25,17 +30,38 @@ pub fn draw(f: &mut Frame, app: &mut App) {
             Style::default().fg(Color::Cyan),
         ),
     ]);
-
     let header_block = Block::default()
         .borders(Borders::ALL)
         .title(" Directory Navigator ");
-    
     f.render_widget(header_block.clone(), chunks[0]);
-    
     let inner_header_area = header_block.inner(chunks[0]);
     let header_paragraph = ratatui::widgets::Paragraph::new(header_line);
     f.render_widget(header_paragraph, inner_header_area);
 
+    // 2. Search Box
+    let search_line = if app.search_query.is_empty() {
+        Line::from(vec![Span::styled(
+            " Type to filter...",
+            Style::default().fg(Color::DarkGray),
+        )])
+    } else {
+        Line::from(vec![
+            Span::raw(" Filter: "),
+            Span::styled(
+                format!("{}_", app.search_query),
+                Style::default().fg(Color::Yellow),
+            ),
+        ])
+    };
+    let search_block = Block::default()
+        .borders(Borders::ALL)
+        .title(" Search ");
+    f.render_widget(search_block.clone(), chunks[1]);
+    let inner_search_area = search_block.inner(chunks[1]);
+    let search_paragraph = ratatui::widgets::Paragraph::new(search_line);
+    f.render_widget(search_paragraph, inner_search_area);
+
+    // 3. List
     let items: Vec<ListItem> = app
         .items
         .iter()
@@ -67,5 +93,5 @@ pub fn draw(f: &mut Frame, app: &mut App) {
         )
         .highlight_symbol(">> ");
 
-    f.render_stateful_widget(list, chunks[1], &mut app.state);
+    f.render_stateful_widget(list, chunks[2], &mut app.state);
 }

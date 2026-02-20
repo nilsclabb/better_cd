@@ -16,9 +16,9 @@ use std::{error::Error, io};
 fn main() -> Result<(), Box<dyn Error>> {
     // setup terminal
     enable_raw_mode()?;
-    let mut stdout = io::stdout();
-    execute!(stdout, EnterAlternateScreen, EnableMouseCapture)?;
-    let backend = CrosstermBackend::new(stdout);
+    let mut stderr = io::stderr();
+    execute!(stderr, EnterAlternateScreen, EnableMouseCapture)?;
+    let backend = CrosstermBackend::new(stderr);
     let mut terminal = Terminal::new(backend)?;
 
     // create app and run it
@@ -41,17 +41,28 @@ fn main() -> Result<(), Box<dyn Error>> {
     Ok(())
 }
 
-fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> io::Result<Option<String>> {
+fn run_app<B: Backend>(terminal: &mut Terminal<B>, app: &mut App) -> Result<Option<String>, Box<dyn Error>> where <B as Backend>::Error: 'static {
     loop {
         terminal.draw(|f| ui::draw(f, app))?;
 
         if let Event::Key(key) = event::read()? {
             match key.code {
-                KeyCode::Char('q') | KeyCode::Esc => return Ok(None),
-                KeyCode::Left => app.go_to_parent(),
+                KeyCode::Esc => return Ok(None),
+                KeyCode::Backspace => {
+                    app.search_query.pop();
+                    app.apply_search();
+                }
+                KeyCode::Char(c) => {
+                    app.search_query.push(c);
+                    app.apply_search();
+                }
+                KeyCode::Left => {
+                    app.search_query.clear();
+                    app.go_to_parent();
+                }
                 KeyCode::Right => {
                     if app.enter_directory() {
-                        // success
+                        app.search_query.clear();
                     }
                 }
                 KeyCode::Down => app.next(),
